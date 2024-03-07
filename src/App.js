@@ -23,70 +23,65 @@ function App() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    window.document.body.addEventListener('Singularity-mounted', () => {
-      console.log('----------singularity mounted--------')
-      let key;
-      if (searchParams.get('key')) {
-        console.log('using key through url');
-        key = searchParams.get('key');
-      } else if (localStorage.getItem('singularity-key')) {
-        console.log('using key through localStorage');
-        key = localStorage.getItem('singularity-key');
-      } else {
-        console.log('using default key value');
-        key = 2; // default key
-      }
-      localStorage.setItem('singularity-key', key);
 
-      window.Singularity.init(key, async () => {
-        console.log('----------singularity init callback--------')
-        window.SingularityEvent.subscribe('SingularityEvent-logout', () => {
-          console.log('logout event received')
-          navigate('/');
-          window.SingularityEvent.close()
-        });
+    let key;
+    if (searchParams.get('key')) {
+      console.log('using key through url');
+      key = searchParams.get('key');
+    } else if (localStorage.getItem('singularity-key')) {
+      console.log('using key through localStorage');
+      key = localStorage.getItem('singularity-key');
+    } else {
+      console.log('using default key value');
+      key = 2; // default key
+    }
+    localStorage.setItem('singularity-key', key);
 
-        window.SingularityEvent.subscribe('SingularityEvent-open', () =>
-          setDrawerOpen(true)
-        );
-
-        window.SingularityEvent.subscribe('SingularityEvent-close', () => {
-          console.log('subscribe close drawer ');
-          setDrawerOpen(false);
-        });
-
-        window.SingularityEvent.subscribe(
-          'SingularityEvent-onTransactionApproval',
-          data => {
-            console.log('Txn approved', JSON.parse(data));
-          }
-        );
-        window.SingularityEvent.subscribe(
-          'SingularityEvent-onTransactionSuccess',
-          data => {
-            console.log('Txn Successfull', JSON.parse(data));
-          }
-        );
-        window.SingularityEvent.subscribe(
-          'SingularityEvent-onTransactionFailure',
-          data => {
-            console.log('Txn failed', JSON.parse(data));
-          }
-        );
-
-        window.SingularityEvent.subscribe('SingularityEvent-login', data => {
-          console.log('login data --->', data);
-          checkLoginAndAction()
-        });
-
-        setLoading(false);
-
-        await checkLoginAndAction();
-
+    initializeSingularity(window, document,'1.7.24','production',key,async () => {
+      console.log('----------singularity init callback--------')
+      window.SingularityEvent.subscribe('SingularityEvent-logout', () => {
+        console.log('logout event received')
+        navigate('/');
+        window.SingularityEvent.close()
       });
-    });
 
-    initializeSingularity(window, document, 'script','Singularity','1.7.24','','','development');
+      window.SingularityEvent.subscribe('SingularityEvent-open', () =>
+        setDrawerOpen(true)
+      );
+
+      window.SingularityEvent.subscribe('SingularityEvent-close', () => {
+        console.log('subscribe close drawer ');
+        setDrawerOpen(false);
+      });
+
+      window.SingularityEvent.subscribe(
+        'SingularityEvent-onTransactionApproval',
+        data => {
+          console.log('Txn approved', JSON.parse(data));
+        }
+      );
+      window.SingularityEvent.subscribe(
+        'SingularityEvent-onTransactionSuccess',
+        data => {
+          console.log('Txn Successfull', JSON.parse(data));
+        }
+      );
+      window.SingularityEvent.subscribe(
+        'SingularityEvent-onTransactionFailure',
+        data => {
+          console.log('Txn failed', JSON.parse(data));
+        }
+      );
+
+      window.SingularityEvent.subscribe('SingularityEvent-login', data => {
+        console.log('login data --->', data);
+        checkLoginAndAction()
+      });
+
+      setLoading(false);
+
+      await checkLoginAndAction();
+    });
   }, []);
 
   const checkLoginAndAction = async () => {
